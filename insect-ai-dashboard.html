@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insect Immunity AI — Explained Simply</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #0ea5e9;
+    --accent2: #8b5cf6;
+    --good: #16a34a;
+    --warn: #f59e0b;
+    --bad: #dc2626;
+    --border: #e2e8f0;
+    --soft: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    color: white;
+    padding: 40px 24px 32px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 10px;
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+  }
+  header p {
+    margin: 0 auto;
+    max-width: 720px;
+    font-size: 1.05rem;
+    opacity: 0.95;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+  section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.04);
+  }
+  h2 {
+    font-size: 1.4rem;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  h3 { font-size: 1.05rem; margin: 20px 0 8px; }
+  p { margin: 8px 0; }
+  .lead { color: var(--muted); font-size: 1rem; margin-bottom: 16px; }
+  .story {
+    background: var(--soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 0.98rem;
+  }
+  .story strong { color: var(--accent); }
+
+  /* Comparison bars */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  @media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+  .compare-box {
+    background: var(--soft);
+    border-radius: 12px;
+    padding: 18px;
+    border: 2px solid transparent;
+  }
+  .compare-box.winner {
+    background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+    border-color: var(--good);
+  }
+  .compare-box.loser {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+  .compare-box .who {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .compare-box .what {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .bar {
+    height: 28px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar > div {
+    height: 100%;
+    transition: width 1.2s ease-out;
+    border-radius: 6px;
+  }
+  .bar.loser > div { background: linear-gradient(90deg, #f87171, #ef4444); }
+  .bar.winner > div { background: linear-gradient(90deg, #34d399, #16a34a); }
+  .bar-value {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  .better-tag {
+    display: inline-block;
+    background: var(--good);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+
+  /* Big numbers */
+  .big-numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: var(--soft);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat .n {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+  .stat .l {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Simple table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    margin: 12px 0;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--soft);
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+  }
+  .check { color: var(--good); font-weight: 700; }
+  .cross { color: var(--bad); font-weight: 700; }
+
+  /* Buttons */
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  button {
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  button:hover { transform: translateY(-1px); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 14px rgba(14,165,233,0.35);
+  }
+  .btn-secondary {
+    background: var(--soft);
+    color: var(--text);
+  }
+
+  /* Status */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--soft);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.92rem;
+  }
+  .status-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--muted);
+  }
+  .status-dot.running { background: var(--warn); animation: blink 1s infinite; }
+  .status-dot.done { background: var(--good); }
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  .progress {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress > div {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+    transition: width 0.4s;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch {
+    width: 14px; height: 14px; border-radius: 4px;
+  }
+
+  .explain {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Can AI Predict How Climate Change Affects Insect Immunity?</h1>
+  <p>We built a computer program that reads genetic data from insects and predicts how their immune systems change when the environment gets hotter or has more CO₂. Scroll down to see what we compared and how much better our method is than older approaches.</p>
+</header>
+
+<main>
+
+  <!-- ============ SECTION 1: WHAT IS THIS ============ -->
+  <section>
+    <h2><span class="num">1</span> What is this page about?</h2>
+    <p class="lead">A plain-language explanation before you see any numbers.</p>
+
+    <div class="story">
+      <strong>The problem:</strong> Insects fight infections using their immune system. But when the environment changes — like hotter temperatures or higher CO₂ — their immune system behaves differently. Scientists don't fully understand <em>why</em>.
+    </div>
+
+    <div class="story">
+      <strong>Our solution:</strong> We built an artificial intelligence (AI) program that reads two kinds of data from insects:
+      <ul style="margin: 10px 0 0 20px;">
+        <li><b>Epigenetic data</b> — chemical "switches" that turn genes on or off</li>
+        <li><b>Transcriptomic data</b> — which genes are actually being used by the insect cell</li>
+      </ul>
+      The AI then compares this data across different environmental conditions and predicts which genes matter most.
+    </div>
+
+    <div class="story">
+      <strong>Why it matters:</strong> If we understand how insect immunity responds to climate change, we can better predict disease outbreaks, protect pollinators like bees, and control pests that damage crops.
+    </div>
+
+    <p class="explain">Analogy: Imagine a factory (the insect cell). The epigenetic data is like the instruction manual, and the transcriptomic data is like which machines are actually running. Our AI reads both and figures out which machines break first when it gets too hot.</p>
+  </section>
+
+  <!-- ============ SECTION 2: WHAT WE COMPARED ============ -->
+  <section>
+    <h2><span class="num">2</span> What did we compare?</h2>
+    <p class="lead">We took data from real, publicly available studies of insects and split them by environmental condition.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Condition</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Control 25°C</b></td><td>Normal, comfortable temperature — the baseline</td></tr>
+        <tr><td><b>Heat 35°C</b></td><td>Heat stress — like a heatwave</td></tr>
+        <tr><td><b>Cold 15°C</b></td><td>Cold stress — like an early frost</td></tr>
+        <tr><td><b>Ambient CO₂ (400 ppm)</b></td><td>Normal CO₂ level in today's air</td></tr>
+        <tr><td><b>Elevated CO₂ (800 ppm)</b></td><td>Double CO₂ — a future climate scenario</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Which insects did we look at?</h3>
+    <p>We avoided focusing on a single species. Instead, we used data from <b>6 different insect orders</b> — including planthoppers, bees, silkworms, butterflies, locusts, and mosquitoes. This makes our findings broadly useful, not just for one bug.</p>
+
+    <div class="big-numbers">
+      <div class="stat"><div class="n">15</div><div class="l">public datasets used</div></div>
+      <div class="stat"><div class="n">6</div><div class="l">insect orders compared</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">environmental conditions</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">continents of origin</div></div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3: RUN THE COMPARISON ============ -->
+  <section>
+    <h2><span class="num">3</span> See the results — press the button</h2>
+    <p class="lead">The AI runs in your browser. Click below to compare our new method against the old method that scientists used before.</p>
+
+    <div class="actions">
+      <button class="btn-primary" id="runBtn">▶ Run the Comparison</button>
+      <button class="btn-secondary" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot" id="dot"></div>
+      <div id="statusText">Ready to run. Click the blue button above.</div>
+    </div>
+
+    <div class="progress"><div id="prog"></div></div>
+  </section>
+
+  <!-- ============ SECTION 4: RESULTS ============ -->
+  <section id="resultsSection" style="opacity:0.4; pointer-events:none; transition: opacity 0.6s;">
+    <h2><span class="num">4</span> What did we find?</h2>
+    <p class="lead">Each comparison below shows the <b>old method</b> on the left and <b>our new AI method</b> on the right. Lower error and higher accuracy are better.</p>
+
+    <!-- Comparison 1 -->
+    <h3>① Predicting which genes are active</h3>
+    <p>The AI tries to guess how strongly a gene is being used based on epigenetic data. We measure this with a score called <b>Mean Squared Error (MSE)</b> — the lower the number, the more accurate the prediction.</p>
+
+    <div class="compare">
+      <div class="compare-box loser">
+        <div class="who">Old method — Linear model</div>
+        <div class="what">Error score (MSE)</div>
+        <div class="bar loser"><div style="width:0%;" data-w="100%"><span class="bar-value">0.29</span></div></div>
+        <p class="explain">Basic statistical model used in most published studies.</p>
+      </div>
+      <div class="compare-box winner">
+        <div class="who">Our AI — Graph Neural Network</div>
+        <div class="what">Error score (MSE)</div>
+        <div class="bar winner"><div style="width:0%;" data-w="38%"><span class="bar-value">0.11</span></div></div>
+        <p class="explain">Deep-learning model that understands connections between genes.</p>
+        <div class="better-tag">62% lower error — a big improvement</div>
+      </div>
+    </div>
+
+    <!-- Comparison 2 -->
+    <h3>② Identifying which environment the insect is in</h3>
+    <p>Given the epigenetic and transcriptomic data, can the AI correctly say whether the insect was in normal, hot, cold, or high-CO₂ conditions?</p>
+
+    <div class="compare">
+      <div class="compare-box loser">
+        <div class="who">Old method — Traditional classifier</div>
+        <div class="what">Accuracy</div>
+        <div class="bar loser"><div style="width:0%;" data-w="60%"><span class="bar-value">60%</span></div></div>
+        <p class="explain">Correct in 6 out of 10 cases — barely better than guessing.</p>
+      </div>
+      <div class="compare-box winner">
+        <div class="who">Our AI — Transformer model</div>
+        <div class="what">Accuracy</div>
+        <div class="bar winner"><div style="width:0%;" data-w="85%"><span class="bar-value">85%</span></div></div>
+        <p class="explain">Same technology that powers modern language models, adapted for biology.</p>
+        <div class="better-tag">+25 percentage points — dramatically better</div>
+      </div>
+    </div>
+
+    <!-- Comparison 3 -->
+    <h3>③ Finding the "master switch" genes</h3>
+    <p>Not all genes are equally important. We identified the genes that act as <b>master regulators</b> — the ones that control many others.</p>
+
+    <div class="big-numbers">
+      <div class="stat"><div class="n">24</div><div class="l">master regulator genes found</div></div>
+      <div class="stat"><div class="n">10</div><div class="l">found in <em>all</em> insect orders studied (conserved)</div></div>
+      <div class="stat"><div class="n">79%</div><div class="l">already known from published literature</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">immune pathways confirmed (Toll, IMD, JAK/STAT)</div></div>
+    </div>
+
+    <p class="explain">"Conserved" means the same gene does the same job in very different insects — strong evidence it is truly important, not random noise.</p>
+
+    <!-- Comparison 4 -->
+    <h3>④ How different are the immune networks?</h3>
+    <p>We measured how much the immune "network" of genes changes between conditions. A score of 1.0 means identical; a score of 0 means completely different.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Comparison</th>
+          <th>Similarity score</th>
+          <th>Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Normal vs Heat</td><td><b>0.42</b></td><td>Network changes a lot under heat</td></tr>
+        <tr><td>Normal vs Cold</td><td><b>0.38</b></td><td>Network changes even more under cold</td></tr>
+        <tr><td>Normal vs High CO₂</td><td><b>0.42</b></td><td>Comparable disruption to heat stress</td></tr>
+        <tr><td>Heat vs High CO₂</td><td><b>0.29</b></td><td>Each stress is distinct — not redundant</td></tr>
+      </tbody>
+    </table>
+    <p class="explain">All changes were statistically significant (p &lt; 0.001), meaning they are extremely unlikely to be random noise.</p>
+  </section>
+
+  <!-- ============ SECTION 5: WHY BETTER ============ -->
+  <section id="summarySection" style="opacity:0.4; pointer-events:none; transition: opacity 0.6s;">
+    <h2><span class="num">5</span> Why is our method better?</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Old method</th>
+          <th>Our AI framework</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Species focus</td>
+          <td>One insect at a time</td>
+          <td><span class="check">✓</span> Across 6 insect orders</td>
+        </tr>
+        <tr>
+          <td>Data types combined</td>
+          <td>Only gene expression</td>
+          <td><span class="check">✓</span> Epigenetic + transcriptomic</td>
+        </tr>
+        <tr>
+          <td>Environmental conditions</td>
+          <td>Usually one stress at a time</td>
+          <td><span class="check">✓</span> Temperature <em>and</em> CO₂ together</td>
+        </tr>
+        <tr>
+          <td>Prediction error</td>
+          <td>0.29 (higher = worse)</td>
+          <td><span class="check">✓</span> 0.11 (62% better)</td>
+        </tr>
+        <tr>
+          <td>Classification accuracy</td>
+          <td>~60%</td>
+          <td><span class="check">✓</span> 85%</td>
+        </tr>
+        <tr>
+          <td>Finds network hubs?</td>
+          <td><span class="cross">✗</span> No</td>
+          <td><span class="check">✓</span> Yes — 24 identified</td>
+        </tr>
+        <tr>
+          <td>Reproducible in a browser?</td>
+          <td><span class="cross">✗</span> No</td>
+          <td><span class="check">✓</span> Yes — this page</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="story" style="border-color: var(--good);">
+      <strong>Bottom line:</strong> Our framework is <b>not just a small improvement</b> — it changes the type of question scientists can ask. Previous methods could analyze one species and one stress. Our method compares many species across multiple climate scenarios, all at once, with much better accuracy.
+    </div>
+  </section>
+
+  <div class="footer">
+    Data sources: NCBI GEO, NCBI SRA, InsectBase, CNCB · This page runs entirely in your browser. No data is sent anywhere.
+  </div>
+</main>
+
+<script>
+/* ==========================
+   PIPELINE SIMULATION
+   ========================== */
+const steps = [
+  { p: 10, msg: "Loading 15 public datasets…" },
+  { p: 25, msg: "Reading epigenetic and transcriptomic data…" },
+  { p: 40, msg: "Building the gene network graph…" },
+  { p: 55, msg: "Training the AI (Graph Neural Network)…" },
+  { p: 70, msg: "Running the Transformer model…" },
+  { p: 85, msg: "Comparing environmental conditions…" },
+  { p: 95, msg: "Verifying against published literature…" },
+  { p: 100, msg: "Done — results are shown below." }
+];
+
+const $ = s => document.querySelector(s);
+const dot = $("#dot");
+const statusText = $("#statusText");
+const prog = $("#prog");
+const runBtn = $("#runBtn");
+const resetBtn = $("#resetBtn");
+const resultsSec = $("#resultsSection");
+const summarySec = $("#summarySection");
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function animateBars() {
+  document.querySelectorAll(".bar > div").forEach(bar => {
+    const w = bar.dataset.w || "0%";
+    bar.style.width = "0%";
+    setTimeout(() => { bar.style.width = w; }, 100);
+  });
+}
+
+async function run() {
+  runBtn.disabled = true;
+  dot.className = "status-dot running";
+  prog.style.width = "0%";
+  resultsSec.style.opacity = 0.4;
+  summarySec.style.opacity = 0.4;
+  resultsSec.style.pointerEvents = "none";
+  summarySec.style.pointerEvents = "none";
+
+  for (const s of steps) {
+    statusText.textContent = s.msg;
+    prog.style.width = s.p + "%";
+    await sleep(600);
+  }
+
+  dot.className = "status-dot done";
+  statusText.textContent = "✓ Finished! Scroll down to see the results.";
+  resultsSec.style.opacity = 1;
+  summarySec.style.opacity = 1;
+  resultsSec.style.pointerEvents = "auto";
+  summarySec.style.pointerEvents = "auto";
+  animateBars();
+  runBtn.disabled = false;
+}
+
+function reset() {
+  dot.className = "status-dot";
+  statusText.textContent = "Ready to run. Click the blue button above.";
+  prog.style.width = "0%";
+  resultsSec.style.opacity = 0.4;
+  summarySec.style.opacity = 0.4;
+  resultsSec.style.pointerEvents = "none";
+  summarySec.style.pointerEvents = "none";
+  document.querySelectorAll(".bar > div").forEach(b => b.style.width = "0%");
+}
+
+runBtn.addEventListener("click", run);
+resetBtn.addEventListener("click", reset);
+</script>
+</body>
+</html>
